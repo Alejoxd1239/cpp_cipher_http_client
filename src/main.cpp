@@ -153,8 +153,11 @@ int main() {
         /**
          * CODE
          */
-    }
 
+        sendRequest(HOST, PORT, path);
+    }
+    #ifdef _WIN32
     WSACleanup();
+    #endif
     return 0;
 }
