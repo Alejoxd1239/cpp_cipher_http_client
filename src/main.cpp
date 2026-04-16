@@ -21,6 +21,7 @@
 #include <string>
 #include <optional>
 #include <vector>
+#include<algorithm>
 
 #ifdef _WIN32
     #include <winsock2.h>
@@ -164,9 +165,23 @@ int main() {
      * Parse the response and then print out the result!
      * ----------------------------------------------------------
      */
-        std:: string p="/rot13-cipher";
+        std:: string p="/inverse-cipher";
         auto res=sendRequest("172.20.203.149",8080, p);
         if(res.has_value()){
+            std::cout<<res.value()<<std::endl;
+            JsonParser json(res.value());
+            auto key =json.get("key");
+            if(key.has_value()){
+            
+
+            }
+            auto ciphertext =json.get("cipherText");
+            if(ciphertext.has_value()){
+                std::string text=ciphertext.value();
+                std::reverse(text.begin(),text.end());
+                std::cout<<text<<std::endl;
+                
+            }
             std::cout<<res.value()<<std::endl;
         }
 
