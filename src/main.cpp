@@ -48,6 +48,12 @@ std::optional<std::string> sendRequest(const std::string& host,
      * end of a network connection.
      * ----------------------------------------------------------
      */
+    int sock=socket(AF_INET,SOCK_STREAM,IPPROTO_TCP);
+    if(sock== INVALID_SOCKET){
+        std::cout<<"Failed to create socket"<<WSAGetLastError()<<std::endl;
+        WSACleanup();
+        return std::nullopt;
+    }
 
     /**
      * ----------------------------------------------------------
@@ -59,6 +65,17 @@ std::optional<std::string> sendRequest(const std::string& host,
      * ----------------------------------------------------------
      */
     
+    sockaddr_in server;
+    server.sin_family=AF_INET;
+    server.sin_port=htons(8080);
+    InetPtonA(AF_INET, host.c_str(),&server.sin_addr.S_un.S_addr);
+    if(connect(sock, (SOCKADDR*)&server,sizeof(server))==SOCKET_ERROR){
+        std::cout<<"Failed to connect: "<<WSAGetLastError()<<std::endl;
+        closesocket(sock);
+        WSACleanup();
+        return std::nullopt;
+    }
+    
     /**
      * ----------------------------------------------------------
      * STEP 3 - Connect to the server
@@ -66,6 +83,17 @@ std::optional<std::string> sendRequest(const std::string& host,
      * succeeds - the socket is ready for I/O.
      * ----------------------------------------------------------
      */
+
+    Request request(host, port, path);
+    std::string raw_request = request.build();
+
+    
+    if(send(sock, raw_request.c_str(),(int)raw_request.length(),0)==SOCKET_ERROR){
+        std::cout<<"failed to send request: "<<WSAGetLastError()<<std::endl;
+        closesocket(sock);
+        WSACleanup();
+        return std::nullopt;
+    }
 
     /**
      * ----------------------------------------------------------
@@ -75,6 +103,22 @@ std::optional<std::string> sendRequest(const std::string& host,
      * stream.
      * ----------------------------------------------------------
      */
+    
+    char buffer[2048];
+    std::string raw_response;
+
+    while(true){
+        memset(buffer, 0,sizeof(buffer));
+        int bytesReceived=recv(sock, buffer, sizeof(buffer)-1,0);
+        if(bytesReceived>0){
+            raw_response.append(buffer, bytesReceived);
+        }else if(bytesReceived==0){
+            break;
+        }else{
+            std::cout<<"Failed to receive response: "<<WSAGetLastError()<<std::endl;
+            break;
+        }
+    }
 
     /** 
      * ----------------------------------------------------------
@@ -86,6 +130,8 @@ std::optional<std::string> sendRequest(const std::string& host,
      * - else = something went wrong.
      */
 
+    Response response = parseResponse(raw_response);
+
     /**
      * ----------------------------------------------------------
      * STEP 6 - Close the socket
@@ -93,11 +139,11 @@ std::optional<std::string> sendRequest(const std::string& host,
      */
 
     std::cout << "Request sent to: " << host << ":" << port << path << std::endl;
-    return std::nullopt;
+    return response.body;
 }
 
 int main() {
-    const std::string HOST = "192.168.0.106";
+    const std::string HOST = "172.20.203.149";
     const int         PORT = 8080;
 
     // Initialise Winsock (Windows only — must be done before any socket call).
@@ -118,6 +164,11 @@ int main() {
      * Parse the response and then print out the result!
      * ----------------------------------------------------------
      */
+        std:: string p="/rot13-cipher";
+        auto res=sendRequest("172.20.203.149",8080, p);
+        if(res.has_value()){
+            std::cout<<res.value()<<std::endl;
+        }
 
     /**
      * ----------------------------------------------------------
@@ -136,6 +187,11 @@ int main() {
      *      4. Decrypt the ciphertext and save the result in a file with the endpoint name
      */
 
+
+
+
+
+    /*
     const std::vector<std::string> endpoints = {
         "/inverse-cipher",
         "/rot13-cipher",
@@ -156,9 +212,9 @@ int main() {
         /**
          * CODE
          */
-
-        sendRequest(HOST, PORT, path);
-    }
+    //     auto response=sendRequest(HOST,PORT,path);
+    //     sendRequest(HOST, PORT, path);
+    // }
     #ifdef _WIN32
     WSACleanup();
     #endif

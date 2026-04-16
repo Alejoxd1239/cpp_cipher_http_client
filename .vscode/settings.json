@@ -1,0 +1,9 @@
+{
+    "makefile.launchConfigurations": [
+        {
+            "cwd": "c:\\Users\\alejo\\Documents\\GitHub\\cpp_cipher_http_client\\build",
+            "binaryPath": "c:\\Users\\alejo\\Documents\\GitHub\\cpp_cipher_http_client\\build\\cipher_client.exe",
+            "binaryArgs": []
+        }
+    ]
+}
