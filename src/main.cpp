@@ -145,6 +145,11 @@ std::optional<std::string> sendRequest(const std::string& host,
     return response.body;
 }
 
+void xor_cipher(std::string &data, char key) {
+    for (size_t i = 0; i < data.size(); ++i) {
+        data[i] ^= key; 
+    }
+}
 
 int main() {
     const std::string HOST = "172.20.203.149";
@@ -168,7 +173,7 @@ int main() {
      * Parse the response and then print out the result!
      * ----------------------------------------------------------
      */
-        std:: string p="/base64-cipher";
+        std:: string p="/xor-cipher";
         auto res=sendRequest("172.20.203.149",8080, p);
         if(res.has_value()){
             std::cout<<res.value()<<std::endl;
@@ -180,8 +185,9 @@ int main() {
             }
             auto ciphertext =json.get("cipherText");
             if(ciphertext.has_value()){
-                std::vector<BYTE> decoded=base64_decode(ciphertext.value());
-                std:: string text(decoded.begin(),decoded.end());
+                char key=3;
+                std::string text=ciphertext.value();
+                xor_cipher(text,key);
                 std::cout<<"Desencrypted "<<text<<std::endl;
             }
         }
