@@ -22,6 +22,7 @@
 #include <optional>
 #include <vector>
 #include<algorithm>
+#include <cctype> 
 
 #ifdef _WIN32
     #include <winsock2.h>
@@ -143,6 +144,7 @@ std::optional<std::string> sendRequest(const std::string& host,
     return response.body;
 }
 
+
 int main() {
     const std::string HOST = "172.20.203.149";
     const int         PORT = 8080;
@@ -165,7 +167,7 @@ int main() {
      * Parse the response and then print out the result!
      * ----------------------------------------------------------
      */
-        std:: string p="/inverse-cipher";
+        std:: string p="/rot13-cipher";
         auto res=sendRequest("172.20.203.149",8080, p);
         if(res.has_value()){
             std::cout<<res.value()<<std::endl;
@@ -178,11 +180,13 @@ int main() {
             auto ciphertext =json.get("cipherText");
             if(ciphertext.has_value()){
                 std::string text=ciphertext.value();
-                std::reverse(text.begin(),text.end());
                 std::cout<<text<<std::endl;
-                
+                for(char&c:text){
+                    if(c>='a'&&c<='z')c='a'+(c-'a'+13)%26;
+                    else if(c>='A'&&c<='Z')c='A'+(c-'A'+13)%26;
+                }
+                std::cout<<"Desencrypted "<<text<<std::endl;
             }
-            std::cout<<res.value()<<std::endl;
         }
 
     /**
