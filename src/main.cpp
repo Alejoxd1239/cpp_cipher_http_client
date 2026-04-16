@@ -167,7 +167,7 @@ int main() {
      * Parse the response and then print out the result!
      * ----------------------------------------------------------
      */
-        std:: string p="/rot13-cipher";
+        std:: string p="/atbash-cipher";
         auto res=sendRequest("172.20.203.149",8080, p);
         if(res.has_value()){
             std::cout<<res.value()<<std::endl;
@@ -182,8 +182,8 @@ int main() {
                 std::string text=ciphertext.value();
                 std::cout<<text<<std::endl;
                 for(char&c:text){
-                    if(c>='a'&&c<='z')c='a'+(c-'a'+13)%26;
-                    else if(c>='A'&&c<='Z')c='A'+(c-'A'+13)%26;
+                    if(c>='a'&&c<='z')c='z'-(c-'a');
+                    else if(c>='A'&&c<='Z')c='Z'-(c-'A');
                 }
                 std::cout<<"Desencrypted "<<text<<std::endl;
             }
