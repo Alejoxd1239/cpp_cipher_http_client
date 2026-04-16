@@ -38,6 +38,7 @@
 #include "http/Request.h"
 #include "http/Response.h"
 #include "json/JsonParser.h"
+#include "base64.h"
 
 std::optional<std::string> sendRequest(const std::string& host,
                                        int                port,
@@ -167,7 +168,7 @@ int main() {
      * Parse the response and then print out the result!
      * ----------------------------------------------------------
      */
-        std:: string p="/ceasar-cipher";
+        std:: string p="/base64-cipher";
         auto res=sendRequest("172.20.203.149",8080, p);
         if(res.has_value()){
             std::cout<<res.value()<<std::endl;
@@ -179,12 +180,8 @@ int main() {
             }
             auto ciphertext =json.get("cipherText");
             if(ciphertext.has_value()){
-                std::string text=ciphertext.value();
-                std::cout<<text<<std::endl;
-                for(char&c:text){
-                    if(c>='a'&&c<='z')c='a'+(c-'a'-5+26)%26;
-                    else if(c>='A'&&c<='Z')c='A'+(c-'A'-5+26)%26;
-                }
+                std::vector<BYTE> decoded=base64_decode(ciphertext.value());
+                std:: string text(decoded.begin(),decoded.end());
                 std::cout<<"Desencrypted "<<text<<std::endl;
             }
         }
